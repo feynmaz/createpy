@@ -1,0 +1,17 @@
+{
+   "version": "0.2.0",
+   "configurations": [
+      {
+         "name": "createpy",
+         "type": "debugpy", // Modern: Fastest Python debugger (Rust-based, auto-installed by VSCode Python ext)
+         "request": "launch",
+         "module": "createpy.cli", // Targets package module (cleaner than file path for src layout)
+         "console": "integratedTerminal",
+         "justMyCode": true, // Focus on your code only (efficient for deps-heavy projects)
+         "cwd": "${workspaceFolder}", // Run from root (uv sync respects this)
+         "env": {
+            "PYTHONPATH": "${workspaceFolder}/src" // Efficient: Resolves 'No module named createpy' for src/ without pip -e .
+         }
+      }
+   ]
+}
