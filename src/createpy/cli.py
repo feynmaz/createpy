@@ -2,8 +2,14 @@
 import typer
 from typing import Optional
 from typer import Option
-from tools import validate_name
-from errors import ErrorReason
+from .errors import ErrorReason
+from .validators import (
+    validate_name,
+    validate_repo,
+    validate_git_user,
+    validate_git_email,
+)
+
 
 app = typer.Typer()
 
@@ -22,11 +28,17 @@ def create(
     git_user: Optional[str] = Option(None, "-u", "--user", help="Git user name"),
     git_email: Optional[str] = Option(None, "-e", "--email", help="Git user email"),
 ):
-    if not name and not repo:
-        raise typer.BadParameter(ErrorReason.NO_VALUES_PROVIDED.value)
+    try:
+        if not (name or repo):
+            raise ValueError(ErrorReason.NO_VALUES_PROVIDED)
 
-    if name:
         validate_name(name)
+        validate_repo(repo)
+        validate_git_user(git_user)
+        validate_git_email(git_email)
+        # TODO: Full logic (dir, uv init, git)
+    except ValueError as e:
+        raise typer.BadParameter(str(e)) from e
 
 
 if __name__ == "__main__":
