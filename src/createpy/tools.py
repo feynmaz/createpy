@@ -1,19 +1,10 @@
-def is_url(string):
-    """
-    Check if a string is a valid URL
-    Returns True if string is a URL, False otherwise
-    """
-    import re
+import re
+from .errors import ErrorReason
 
-    # URL pattern matching most common formats
-    url_pattern = re.compile(
-        r"^(?:http|ftp)s?://"  # http:// or https:// or ftp:// or ftps://
-        r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|"  # domain
-        r"localhost|"  # localhost
-        r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # IP address
-        r"(?::\d+)?"  # optional port
-        r"(?:/?|[/?]\S+)$",
-        re.IGNORECASE,
-    )
 
-    return bool(url_pattern.match(string))
+def validate_name(name: str):
+    if not name.strip():
+        raise ValueError(ErrorReason.EMPTY_NAME.value)
+
+    if not re.match(r"^[a-zA-Z][\w.-]*$", name):
+        raise ValueError(ErrorReason.INVALID_NAME_CHARS.value)
