@@ -1,0 +1,67 @@
+name: Build & Release (createpy)
+
+on:
+  push:
+    tags:
+      - "v*"
+
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Sync deps
+        run: uv sync --frozen
+
+      - name: Install PyInstaller
+        run: uv tool install pyinstaller
+
+      - name: Build binary
+        run: uv run pyinstaller createpy.py --onefile --name createpy
+
+      - name: Prepare release files (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p dist_release
+          mv dist/createpy dist_release/createpy-linux
+          chmod +x dist_release/createpy-linux
+
+      - name: Prepare release files (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          if not exist dist_release mkdir dist_release
+          move dist\createpy.exe dist_release\createpy-windows.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ runner.os }}
+          path: dist_release/*
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+
+
+    steps:
+      - uses: actions/download-artifact@v4
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            **/createpy-linux
+            **/createpy-windows.exe

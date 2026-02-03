@@ -21,6 +21,7 @@ dev = [
 members = [
     "test",
     "dist/test",
+    "dist/testcreatepy",
 ]
 
 [project.scripts]
