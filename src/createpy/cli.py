@@ -60,13 +60,15 @@ def create(
         if git_email:
             subprocess.run(["git", "config", "user.email", git_email], check=True)
 
-        # Commit and push
+        # Add remote
         if repo:
-            typer.echo("Committing to remote...")
-            subprocess.run(["git", "add", "."], check=True)
-            subprocess.run(["git", "commit", "-m", "Initial commit"], check=True)
+            typer.echo("Adding remote...")
             subprocess.run(["git", "remote", "add", "origin", repo], check=True)
-            subprocess.run(["git", "push", "-u", "origin", "master"], check=True)
+
+        # Add tools
+        result = subprocess.run(["uv", "add", "--dev", "ruff", "pytest"], check=True)
+        if result.returncode != 0:
+            raise RuntimeError(f"Failed to add tools: {result.stderr}")
 
     except ValueError as e:
         raise typer.BadParameter(str(e)) from e
@@ -74,3 +76,7 @@ def create(
 
 if __name__ == "__main__":
     app()
+
+    # subprocess.run(["git", "add", "."], check=True)
+    # subprocess.run(["git", "commit", "-m", "Initial commit"], check=True)
+    # subprocess.run(["git", "push", "-u", "origin", "master"], check=True)
