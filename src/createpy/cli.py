@@ -41,8 +41,8 @@ def create(
         if not name:
             name = repo.split("/")[-1].split(".")[0]
 
+        # Create project
         typer.echo(f"Creating project {name}...")
-
         result = subprocess.run(
             ["uv", "init", name],
             check=True,
@@ -51,6 +51,16 @@ def create(
         )
         if result.returncode != 0:
             raise RuntimeError(f"Failed to create project: {result.stderr}")
+
+        # Init repo
+        if repo:
+            typer.echo("Initializing git repo...")
+            subprocess.run(["git", "init"], check=True)
+            subprocess.run(["git", "add", "."], check=True)
+            subprocess.run(["git", "commit", "-m", "Initial commit"], check=True)
+            subprocess.run(["git", "remote", "add", "origin", repo], check=True)
+            subprocess.run(["git", "push", "-u", "origin", "master"], check=True)
+            typer.echo("Repository initialized and pushed successfully")
 
         # TODO: Full logic (dir, uv init, git)
 
