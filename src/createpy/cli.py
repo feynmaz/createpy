@@ -62,8 +62,11 @@ def create(
 
         # Add remote
         if repo:
-            typer.echo("Adding remote...")
+            typer.echo("Pushing to remote...")
             subprocess.run(["git", "remote", "add", "origin", repo], check=True)
+            subprocess.run(["git", "add", "."], check=True)
+            subprocess.run(["git", "commit", "-m", "Initial commit"], check=True)
+            subprocess.run(["git", "push", "-u", "origin", "master"], check=True)
 
         # Add tools
         result = subprocess.run(["uv", "add", "--dev", "ruff", "pytest"], check=True)
@@ -76,7 +79,3 @@ def create(
 
 if __name__ == "__main__":
     app()
-
-    # subprocess.run(["git", "add", "."], check=True)
-    # subprocess.run(["git", "commit", "-m", "Initial commit"], check=True)
-    # subprocess.run(["git", "push", "-u", "origin", "master"], check=True)
