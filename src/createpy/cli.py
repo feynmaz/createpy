@@ -3,6 +3,7 @@ import typer
 from typing import Optional
 from typer import Option
 import subprocess
+from subprocess import CalledProcessError
 from src.createpy.errors import ErrorReason
 from src.createpy.validators import (
     validate_name,
@@ -43,14 +44,12 @@ def create(
 
         # Create project
         typer.echo(f"Creating project {name}...")
-        result = subprocess.run(
+        subprocess.run(
             ["uv", "init", name],
             check=True,
             capture_output=True,
             text=True,
         )
-        if result.returncode != 0:
-            raise RuntimeError(f"Failed to create project: {result.stderr}")
         subprocess.run(["git", "init"], cwd=name, check=True)
 
         #  Set git user/email
@@ -79,14 +78,15 @@ def create(
             )
 
         # Add tools
-        result = subprocess.run(
+        subprocess.run(
             ["uv", "add", "--dev", "ruff", "pytest"], cwd=name, check=True
         )
-        if result.returncode != 0:
-            raise RuntimeError(f"Failed to add tools: {result.stderr}")
 
-    except ValueError as e:
-        raise typer.BadParameter(str(e)) from e
+    except ValueError as ve:
+        raise typer.BadParameter(str(ve)) from ve
+
+    except CalledProcessError as cpe:
+        raise typer.Exit(f"Command failed: {cpe.stderr}", code=1) from cpe
 
 
 if __name__ == "__main__":
