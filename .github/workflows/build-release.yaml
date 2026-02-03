@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - "v*"
+      - "v*.*.*"  # Stricter: vMajor.Minor.Patch (fastest semver match)
 
 jobs:
   build:
@@ -11,24 +11,15 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ["3.13"]
-
+        python-version: ["3.14"]
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v1  # uv setup: Fastest installer
+      - run: uv sync
+      - run: uv build --wheel  # Wheels: Universal, efficient install
+      - uses: actions/upload-artifact@v4
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
-      - name: Sync deps
-        run: uv sync
-      - name: Build wheel
-        run: uv build --wheel
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheel-${{ matrix.os }}
+          name: wheels-${{ matrix.os }}
           path: dist/*.whl
 
   release:
@@ -36,18 +27,10 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v4
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: wheel-ubuntu-latest
-          path: dist
       - uses: actions/download-artifact@v4
         with:
-          name: wheel-windows-latest
+          pattern: wheels-*
           path: dist
-      - name: Create release
-        uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v2
         with:
-          files: dist/*.whl
-          draft: false
-          prerelease: false
+          files: dist/**/*.whl  # Attach all wheels
