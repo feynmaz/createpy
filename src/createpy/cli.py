@@ -81,6 +81,7 @@ def create(
         subprocess.run(
             ["uv", "add", "--dev", "ruff", "pytest"], cwd=name, check=True
         )
+        subprocess.run(["uv", "lock"], cwd=name, check=True)
 
     except ValueError as ve:
         raise typer.BadParameter(str(ve)) from ve
