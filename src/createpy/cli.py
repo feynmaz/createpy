@@ -62,7 +62,12 @@ def create(
             subprocess.run(["git", "push", "-u", "origin", "master"], check=True)
             typer.echo("Repository initialized and pushed successfully")
 
-        # TODO: Full logic (dir, uv init, git)
+        #  Set git user/email
+        if git_user:
+            subprocess.run(["git", "config", "user.name", git_user], check=True)
+
+        if git_email:
+            subprocess.run(["git", "config", "user.email", git_email], check=True)
 
     except ValueError as e:
         raise typer.BadParameter(str(e)) from e
