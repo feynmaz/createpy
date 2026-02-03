@@ -1,6 +1,6 @@
 import re
 
-from .errors import ErrorReason
+from src.createpy.errors import ErrorReason
 
 # Matches valid names that:
 # - Must start with a letter
@@ -49,21 +49,30 @@ EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
 
 def validate_name(name: str | None) -> None:
-    if not name or not name.strip():
+    if name is None:
+        return
+
+    if not name.strip():
         raise ValueError(ErrorReason.EMPTY_NAME)
     if not NAME_REGEX.match(name):
         raise ValueError(ErrorReason.INVALID_NAME_CHARS)
 
 
 def validate_repo(repo: str | None) -> None:
-    if not repo or not repo.strip():
+    if repo is None:
+        return
+
+    if not repo.strip():
         raise ValueError(ErrorReason.EMPTY_REPO)
     if not REPO_REGEX.match(repo):
         raise ValueError(ErrorReason.INVALID_REPO_URL)
 
 
 def validate_git_user(git_user: str | None) -> None:
-    if not git_user or not git_user.strip():
+    if git_user is None:
+        return
+
+    if not git_user.strip():
         raise ValueError(ErrorReason.EMPTY_GIT_USER)
     if len(git_user) > 39:
         raise ValueError(ErrorReason.GIT_USER_TOO_LONG)
@@ -72,7 +81,10 @@ def validate_git_user(git_user: str | None) -> None:
 
 
 def validate_git_email(git_email: str | None) -> None:
-    if not git_email or not git_email.strip():
+    if git_email is None:
+        return
+
+    if not git_email.strip():
         raise ValueError(ErrorReason.EMPTY_GIT_EMAIL)
     if len(git_email) > 254 or not EMAIL_REGEX.match(git_email):
         raise ValueError(ErrorReason.INVALID_GIT_EMAIL)

@@ -3,8 +3,8 @@ import typer
 from typing import Optional
 from typer import Option
 import subprocess
-from .errors import ErrorReason
-from .validators import (
+from src.createpy.errors import ErrorReason
+from src.createpy.validators import (
     validate_name,
     validate_repo,
     validate_git_user,
@@ -51,25 +51,37 @@ def create(
         )
         if result.returncode != 0:
             raise RuntimeError(f"Failed to create project: {result.stderr}")
-        subprocess.run(["git", "init"], check=True)
+        subprocess.run(["git", "init"], cwd=name, check=True)
 
         #  Set git user/email
         if git_user:
-            subprocess.run(["git", "config", "user.name", git_user], check=True)
+            subprocess.run(
+                ["git", "config", "user.name", git_user], cwd=name, check=True
+            )
 
         if git_email:
-            subprocess.run(["git", "config", "user.email", git_email], check=True)
+            subprocess.run(
+                ["git", "config", "user.email", git_email], cwd=name, check=True
+            )
 
         # Add remote
         if repo:
             typer.echo("Pushing to remote...")
-            subprocess.run(["git", "remote", "add", "origin", repo], check=True)
-            subprocess.run(["git", "add", "."], check=True)
-            subprocess.run(["git", "commit", "-m", "Initial commit"], check=True)
-            subprocess.run(["git", "push", "-u", "origin", "master"], check=True)
+            subprocess.run(
+                ["git", "remote", "add", "origin", repo], cwd=name, check=True
+            )
+            subprocess.run(["git", "add", "."], cwd=name, check=True)
+            subprocess.run(
+                ["git", "commit", "-m", "Initial commit"], cwd=name, check=True
+            )
+            subprocess.run(
+                ["git", "push", "-u", "origin", "master"], cwd=name, check=True
+            )
 
         # Add tools
-        result = subprocess.run(["uv", "add", "--dev", "ruff", "pytest"], check=True)
+        result = subprocess.run(
+            ["uv", "add", "--dev", "ruff", "pytest"], cwd=name, check=True
+        )
         if result.returncode != 0:
             raise RuntimeError(f"Failed to add tools: {result.stderr}")
 
