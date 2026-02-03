@@ -51,16 +51,7 @@ def create(
         )
         if result.returncode != 0:
             raise RuntimeError(f"Failed to create project: {result.stderr}")
-
-        # Init repo
-        if repo:
-            typer.echo("Initializing git repo...")
-            subprocess.run(["git", "init"], check=True)
-            subprocess.run(["git", "add", "."], check=True)
-            subprocess.run(["git", "commit", "-m", "Initial commit"], check=True)
-            subprocess.run(["git", "remote", "add", "origin", repo], check=True)
-            subprocess.run(["git", "push", "-u", "origin", "master"], check=True)
-            typer.echo("Repository initialized and pushed successfully")
+        subprocess.run(["git", "init"], check=True)
 
         #  Set git user/email
         if git_user:
@@ -68,6 +59,14 @@ def create(
 
         if git_email:
             subprocess.run(["git", "config", "user.email", git_email], check=True)
+
+        # Commit and push
+        if repo:
+            typer.echo("Committing to remote...")
+            subprocess.run(["git", "add", "."], check=True)
+            subprocess.run(["git", "commit", "-m", "Initial commit"], check=True)
+            subprocess.run(["git", "remote", "add", "origin", repo], check=True)
+            subprocess.run(["git", "push", "-u", "origin", "master"], check=True)
 
     except ValueError as e:
         raise typer.BadParameter(str(e)) from e
