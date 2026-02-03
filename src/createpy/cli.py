@@ -2,6 +2,7 @@
 import typer
 from typing import Optional
 from typer import Option
+import subprocess
 from .errors import ErrorReason
 from .validators import (
     validate_name,
@@ -36,7 +37,23 @@ def create(
         validate_repo(repo)
         validate_git_user(git_user)
         validate_git_email(git_email)
+
+        if not name:
+            name = repo.split("/")[-1].split(".")[0]
+
+        typer.echo(f"Creating project {name}...")
+
+        result = subprocess.run(
+            ["uv", "init", name],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(f"Failed to create project: {result.stderr}")
+
         # TODO: Full logic (dir, uv init, git)
+
     except ValueError as e:
         raise typer.BadParameter(str(e)) from e
 
